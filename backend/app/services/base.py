@@ -91,6 +91,41 @@ class BaseService(Generic[ModelType, CreateSchemaType]):
             total=total,
             items=items,
         )
+        
+    def apply_filters(self, query, params):
+        """
+        Hook for applying custom filters to the query.
+
+        Override this in subclasses to add endpoint-specific filtering logic
+        using values from params.
+
+        Args:
+            query: SQLAlchemy query to be filtered.
+            params (BaseQueryParams): Incoming parameters carrying filter values.
+
+        Returns:
+            Any: The modified (or original) SQLAlchemy query.
+        """
+        return query
+
+    def apply_sorting(self, query, params):
+        """
+        Apply sorting to the query if a valid sort_by field is provided.
+
+        Args:
+            query: SQLAlchemy query to be sorted.
+            params (BaseQueryParams): Parameters providing sort_by and desc.
+
+        Returns:
+            Any: The query with ordering applied if possible.
+        """
+        if params.sort_by:
+            column = getattr(self.repo.model, params.sort_by, None)
+            if column is not None:
+                if params.desc:
+                    column = column.desc()
+                query = query.order_by(column)
+        return query
 
     def get_by_id(self, obj_id: int) -> ModelType:
         """
