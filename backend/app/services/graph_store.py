@@ -117,7 +117,7 @@ class GraphStore:
         graph: nx.MultiDiGraph,
         start_node: Any,
         end_node: Any,
-        k: int = 2,
+        k: int = 10,
         weight: str = "length",
     ) -> list[list[Any]]:
         return list(
@@ -129,6 +129,23 @@ class GraphStore:
                 weight=weight,
             )
         )
+
+    @staticmethod
+    def get_path_duration_seconds(
+        graph: nx.MultiDiGraph,
+        node_path: list[Any],
+        weight: str = "length",
+    ) -> float:
+        duration_s = 0.0
+        for start_node, end_node in zip(node_path[:-1], node_path[1:]):
+            _, edge_attr = GraphStore.choose_best_parallel_edge(
+                graph=graph,
+                start_node=start_node,
+                end_node=end_node,
+                weight=weight,
+            )
+            duration_s += GraphStore.estimate_travel_time_seconds(edge_attr)
+        return duration_s
 
     @staticmethod
     def parse_speed_kph(maxspeed: Any) -> float:
@@ -213,7 +230,7 @@ class GraphStore:
         node_path: list[Any],
         weight: str = "length",
     ) -> dict[str, Any]:
-        edges: list[dict[str, Any]] = []
+        coordinates: list[list[float]] = []
         distance_m = 0.0
         duration_s = 0.0
 
@@ -228,30 +245,76 @@ class GraphStore:
             length_m = float(edge_attr.get("length", 0.0))
             travel_time_s = GraphStore.estimate_travel_time_seconds(edge_attr)
 
-            edges.append(
-                {
-                    "u": GraphStore.to_int_if_possible(start_node),
-                    "v": GraphStore.to_int_if_possible(end_node),
-                    "key": edge_key,
-                    "length_m": length_m,
-                    "travel_time_s": travel_time_s,
-                    "geometry": GraphStore.get_edge_geometry(
-                        graph=graph,
-                        start_node=start_node,
-                        end_node=end_node,
-                        edge_attr=edge_attr,
-                    ),
-                }
+            geometry = GraphStore.get_edge_geometry(
+                graph=graph,
+                start_node=start_node,
+                end_node=end_node,
+                edge_attr=edge_attr,
             )
+
+            if not coordinates:
+                coordinates.extend(geometry)
+            elif geometry:
+                if coordinates[-1] == geometry[0]:
+                    coordinates.extend(geometry[1:])
+                else:
+                    coordinates.extend(geometry)
 
             distance_m += length_m
             duration_s += travel_time_s
 
         return {
-            "edges": edges,
-            "distance_m": distance_m,
-            "duration_s": duration_s,
+            "coordinates": coordinates,
+            "distance_km": round(distance_m / 1000.0, 1),
+            "duration_min": int(round(duration_s / 60.0)),
         }
+
+    @staticmethod
+    def choose_personalized_path(
+        graph: nx.MultiDiGraph,
+        paths: list[list[Any]],
+        driving_style: str | None,
+        weight: str = "length",
+    ) -> list[Any] | None:
+        if len(paths) < 2:
+            return None
+
+        style = (driving_style or "").lower()
+
+        if style == "dynamic":
+            index = 2 if len(paths) > 2 else len(paths) - 1
+            return paths[index]
+
+        if style == "vibe":
+            index = 6 if len(paths) > 6 else len(paths) - 1
+            return paths[index]
+
+        if style in {"safe", "eco"}:
+            target_delta = 5 * 60.0
+            fastest_duration = GraphStore.get_path_duration_seconds(
+                graph=graph,
+                node_path=paths[0],
+                weight=weight,
+            )
+
+            best_path = None
+            best_diff = float("inf")
+
+            for path in paths[1:]:
+                duration = GraphStore.get_path_duration_seconds(
+                    graph=graph,
+                    node_path=path,
+                    weight=weight,
+                )
+                delta = duration - fastest_duration
+                diff = abs(delta - target_delta)
+                if diff < best_diff:
+                    best_diff = diff
+                    best_path = path
+
+            return best_path or (paths[1] if len(paths) > 1 else None)
+
+        return paths[1] if len(paths) > 1 else None
 
     @staticmethod
     def get_two_routes_between_points(
@@ -261,6 +324,7 @@ class GraphStore:
         end_lon: float,
         file_name: str | None = None,
         weight: str = "length",
+        driving_style: str | None = None,
     ) -> dict[str, Any]:
         graph = GraphStore.get_graph(file_name=file_name)
 
@@ -271,7 +335,7 @@ class GraphStore:
             graph=graph,
             start_node=start_node,
             end_node=end_node,
-            k=2,
+            k=10,
             weight=weight,
         )
 
@@ -285,19 +349,24 @@ class GraphStore:
             else None
         )
 
-        suggested_route = (
+        personalized_path = GraphStore.choose_personalized_path(
+            graph=graph,
+            paths=paths,
+            driving_style=driving_style,
+            weight=weight,
+        )
+
+        personalized_route = (
             GraphStore.build_route_from_node_path(
                 graph=graph,
-                node_path=paths[1],
+                node_path=personalized_path,
                 weight=weight,
             )
-            if len(paths) > 1
+            if personalized_path
             else None
         )
 
         return {
-            "start_node": GraphStore.to_int_if_possible(start_node),
-            "end_node": GraphStore.to_int_if_possible(end_node),
             "shortest_route": shortest_route,
-            "suggested_route": suggested_route,
+            "personalized_route": personalized_route,
         }

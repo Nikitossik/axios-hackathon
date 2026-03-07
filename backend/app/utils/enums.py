@@ -16,4 +16,4 @@ class UserDrivingStyleEnum(str, enum.Enum):
     safe = "safe"
     dynamic = "dynamic"
     eco = "eco"
-    scenic = "scenic"
+    vibe = "vibe"
