@@ -28,6 +28,7 @@ app.add_middleware(
 
 app.include_router(r.auth_router)
 app.include_router(r.user_router)
+app.include_router(r.route_router)
 
 
 if __name__ == "__main__":
