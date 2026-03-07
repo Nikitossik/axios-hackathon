@@ -5,7 +5,7 @@ from typing import Annotated
 
 from ..services import UserService
 from ..dependencies import get_db
-from ..schemas.user import Token, RefreshTokenIn
+from ..schemas.token import Token, RefreshTokenIn
 import app.utils.security as security
 
 

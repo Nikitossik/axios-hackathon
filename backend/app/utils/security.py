@@ -1,7 +1,7 @@
 from pwdlib import PasswordHash
 import jwt
-from jwt.exceptions import InvalidTokenError
-
+from pydantic import ValidationError
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from datetime import timedelta, datetime, timezone
 from ..config import setting
 from ..utils import exceptions
@@ -92,6 +92,7 @@ def decode_token(token, token_type="access"):
 
     Raises:
         InvalidCredentialsException: If the token is invalid or missing required claims.
+        ExpiredTokenException: If the token has expired.
     """
     token_key = (
         setting.ACCESS_SECRET_KEY
@@ -105,7 +106,9 @@ def decode_token(token, token_type="access"):
         if payload.get("sub") is None:
             raise exceptions.InvalidCredentialsException()
 
-    except InvalidTokenError:
+    except ExpiredSignatureError:
+        raise exceptions.ExpiredTokenException()
+    except (InvalidTokenError, ValidationError):
         raise exceptions.InvalidCredentialsException()
     else:
         return payload

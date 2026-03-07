@@ -4,13 +4,13 @@ from typing import Annotated
 
 from ..dependencies import get_db, get_current_user
 from ..models.user import User
-from ..schemas.shared import PaginatedResponse
+from ..schemas.shared import PaginatedResponse, BaseQueryParams
 from ..schemas.user import (
     UserIn,
     UserOut,
-    UserUpdate,
-    UserQueryParams
+    UserUpdate
 )
+from ..schemas.user_profile import UserProfileIn
 from ..services import UserService
 
 # Router: Users CRUD, authentication helpers, and profile access
@@ -23,7 +23,7 @@ user_router = APIRouter(prefix="/api/user", tags=["Users"])
     description="Return a paginated list of users. Supports pagination, sorting, and filters (user_roles, user_types, q).",
 )
 async def get_users(
-    *, db: Session = Depends(get_db), query_params: Annotated[UserQueryParams, Query()]
+    *, db: Session = Depends(get_db), query_params: Annotated[BaseQueryParams, Query()]
 ):
     return UserService(db).get_paginated(query_params)
 
@@ -59,6 +59,17 @@ async def get_user_by_id(*, user_id: int, db: Session = Depends(get_db)):
 )
 async def create_user(user: UserIn, db: Session = Depends(get_db)):
     return UserService(db).create(user)
+
+
+@user_router.post(
+    "/{user_id}/profile",
+    response_model=UserOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a user profile",
+    description="Create a new user profile for a given user ID. Admin-only.",
+)
+async def create_user_profile(user_id: int, profile: UserProfileIn, db: Session = Depends(get_db)):
+    return UserService(db).create_profile(user_id, profile)
 
 
 @user_router.put(

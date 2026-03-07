@@ -8,7 +8,6 @@ class AlreadyExistsException(HTTPException):
             detail=f"{entity} with {field} '{value}' already exists.",
         )
 
-
 class UserNotFoundException(HTTPException):
     def __init__(self):
         super().__init__(
@@ -22,5 +21,13 @@ class InvalidCredentialsException(HTTPException):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
+class ExpiredTokenException(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired",
             headers={"WWW-Authenticate": "Bearer"},
         )

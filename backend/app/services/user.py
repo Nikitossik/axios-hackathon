@@ -1,14 +1,15 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from ..repositories import (
-    UserRepository
+    UserRepository, UserProfileRepository
 )
 from ..models import User
-from ..schemas.user import UserIn, UserUpdate
+from ..schemas.user import UserIn, UserUpdate, UserOut
+from ..schemas.user_profile import UserProfileIn
 from ..utils import exceptions, security
 from app.utils.exceptions import AlreadyExistsException
 from .base import BaseService
-
+from fastapi import HTTPException, status
 
 class UserService(BaseService[User, UserIn]):
     """
@@ -28,6 +29,7 @@ class UserService(BaseService[User, UserIn]):
             db (Session): Active SQLAlchemy session.
         """
         super().__init__(db, User, UserRepository(db))
+        self.profile_repo = UserProfileRepository(db)
 
     def authenticate(self, user_email, user_password) -> User:
         """
@@ -82,6 +84,26 @@ class UserService(BaseService[User, UserIn]):
         new_user = super().create(user_data)
 
         return new_user
+    
+    def create_profile(self, user_id: int, profile_data: UserProfileIn) -> UserOut:
+        """
+        Create a user profile for a given user ID.
+
+        Args:
+            user_id (int): Identifier of the user to associate the profile with.
+            profile_data (UserProfileIn): Data for the new user profile.
+        Returns:
+            UserOut: The user with the newly created profile.
+        """
+        found_user = self.get_by_id(user_id)
+        
+        if found_user.profile:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User profile already exists.")
+        
+        profile_dict = profile_data.model_dump()
+        profile_dict["user_id"] = user_id
+        new_profile = self.profile_repo.create(profile_dict)
+        return found_user
 
     def update(self, user_id: int, user: UserIn | UserUpdate) -> User:
         """

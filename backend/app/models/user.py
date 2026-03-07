@@ -5,6 +5,8 @@ from sqlalchemy import String, Enum
 
 from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from .user_profile import UserProfile
 
 class User(Base):
     __tablename__ = "user"
@@ -20,3 +22,5 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(
         String(256)
     )  # Secure password hash (never store plaintext)
+    profile: Mapped["UserProfile"] = relationship(
+        "UserProfile", back_populates="user", uselist=False, lazy="selectin")

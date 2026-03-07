@@ -1,5 +1,5 @@
 from .base import BaseRepository
-from ..models import User
+from ..models import User, UserProfile
 
 
 class UserRepository(BaseRepository):
@@ -19,3 +19,9 @@ class UserRepository(BaseRepository):
         """
         return self.db.query(User).filter(User.email == user_email).first()
 
+
+
+class UserProfileRepository(BaseRepository):
+    """Repository for UserProfile entities, providing common queries on top of BaseRepository."""
+
+    model = UserProfile

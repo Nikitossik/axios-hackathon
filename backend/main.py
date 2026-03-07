@@ -4,12 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 import app.routes as r
+from app.utils.lifespan import lifespan
 
 # Initialize database
 Base.metadata.create_all(engine)
 
 # Create FastAPI application with configuration
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 # CConfigure CORS and other middleware
 origins = [
