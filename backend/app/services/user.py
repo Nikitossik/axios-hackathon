@@ -85,7 +85,7 @@ class UserService(BaseService[User, UserIn]):
 
         return new_user
     
-    def create_profile(self, user_id: int, profile_data: UserProfileIn) -> UserOut:
+    def create_profile(self, user_id: int, profile_data: UserProfileIn) -> User:
         """
         Create a user profile for a given user ID.
 
@@ -93,7 +93,7 @@ class UserService(BaseService[User, UserIn]):
             user_id (int): Identifier of the user to associate the profile with.
             profile_data (UserProfileIn): Data for the new user profile.
         Returns:
-            UserOut: The user with the newly created profile.
+            User: The user with the newly created profile.
         """
         found_user = self.get_by_id(user_id)
         
@@ -117,14 +117,16 @@ class UserService(BaseService[User, UserIn]):
         Returns:
             User: Updated user entity.
         """
-        user_data = user.model_dump()
-
+        user_data = user.model_dump(exclude_unset=True)
+        profile_data = user_data.pop("profile", None)
         if user_data.get("password"):
             user_data["password_hash"] = security.get_password_hash(
                 user_data["password"]
             )
 
         updated_user = super().update(user_id, user_data)
+        if profile_data:
+            self.profile_repo.update(updated_user.profile, profile_data)
         return updated_user
 
     def delete(self, user_id: int):

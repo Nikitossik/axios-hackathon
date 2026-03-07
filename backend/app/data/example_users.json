@@ -1,0 +1,52 @@
+{
+    "users": [
+        {
+            "name": "Anna",
+            "surname": "Kowalska",
+            "email": "anna@krk.pl",
+            "password": "123123",
+            "profile": {
+                "gender": "female",
+                "age_group": "25_35",
+                "driving_experience_years": 3,
+                "driving_style": "safe"
+            }
+        },
+        {
+            "name": "Kamil",
+            "surname": "Nowak",
+            "email": "kamil@krk.pl",
+            "password": "123123",
+            "profile": {
+                "gender": "male",
+                "age_group": "18_25",
+                "driving_experience_years": 4,
+                "driving_style": "dynamic"
+            }
+        },
+        {
+            "name": "Marta",
+            "surname": "Wojcik",
+            "email": "marta@krk.pl",
+            "password": "123123",
+            "profile": {
+                "gender": "female",
+                "age_group": "35_plus",
+                "driving_experience_years": 14,
+                "driving_style": "eco"
+            }
+        },
+        {
+            "name": "Piotr",
+            "surname": "Zielinski",
+            "email": "piotr@krk.pl",
+            "password": "123123",
+            "profile": {
+                "gender": "male",
+                "age_group": "35_plus",
+                "driving_experience_years": 10,
+                "driving_style": "scenic"
+            }
+        }
+    ]
+}

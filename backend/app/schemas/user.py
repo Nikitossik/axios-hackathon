@@ -8,7 +8,7 @@ from pydantic import (
 from typing import Annotated
 from typing_extensions import Self
 from .shared import BaseQueryParams, BaseFilterParams
-from .user_profile import UserProfileOut
+from .user_profile import UserProfileUpdate, UserProfileOut
 
 class UserBase(BaseModel):
     """
@@ -53,7 +53,7 @@ class UserIn(UserBase):
     password: Annotated[
         str,
         Field(
-            min_length=3,
+            min_length=6,
             description="Plaintext password for account creation (will be hashed).",
             examples=["s3cr3tPwd"],
         ),
@@ -67,20 +67,11 @@ class UserUpdate(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    email: Annotated[
-        str | None,
-        Field(
-            None,
-            max_length=100,
-            description="Optional new email address.",
-            examples=["new.user@example.com"],
-        ),
-    ]
     password: Annotated[
         str | None,
         Field(
             None,
-            min_length=3,
+            min_length=6,
             description="Optional new plaintext password (will be hashed).",
             examples=["n3wS3cr3t"],
         ),
@@ -103,6 +94,11 @@ class UserUpdate(BaseModel):
             examples=["Hopper"],
         ),
     ]
+    
+    profile: UserProfileUpdate | None = Field(
+        None,
+        description="Optional profile information to update alongside user data.",
+    )
 
 
 class UserOut(UserBase):

@@ -11,3 +11,9 @@ class UserAgeGroupEnum(str, enum.Enum):
     age_18_25 = "18_25"
     age_25_35 = "25_35"
     age_35_plus = "35_plus"
+
+class UserDrivingStyleEnum(str, enum.Enum):
+    safe = "safe"
+    dynamic = "dynamic"
+    eco = "eco"
+    scenic = "scenic"

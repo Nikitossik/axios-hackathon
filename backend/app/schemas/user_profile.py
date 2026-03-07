@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from ..utils.enums import UserGenderEnum, UserAgeGroupEnum
+from ..utils.enums import UserGenderEnum, UserAgeGroupEnum, UserDrivingStyleEnum
 
 class UserProfileBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -7,9 +7,13 @@ class UserProfileBase(BaseModel):
     age_group: UserAgeGroupEnum = Field(..., description="User's age group")
     driving_experience_years: int = Field(..., description="Years of driving experience")
     gender_identity: UserGenderEnum = Field(..., description="User's gender identity")
-    gender_self_description: str | None = Field(None, max_length=100, description="Optional self-description of gender identity")
+    driving_style: UserDrivingStyleEnum | None = Field(None, description="User's driving style")
+
     
-    
+class UserProfileUpdate(BaseModel):
+    age_group: UserAgeGroupEnum | None = Field(None, description="User's age group")
+    driving_experience_years: int | None = Field(None, description="Years of driving experience")
+    driving_style: UserDrivingStyleEnum | None = Field(None, description="User's driving style")
 class UserProfileIn(UserProfileBase):
     pass
 
