@@ -20,6 +20,7 @@ class RouteResponse(BaseModel):
     driving_style: str | None
     shortest_route: RouteOut | None
     personalized_route: RouteOut | None
+    karma_points: int | None = None
 
 class RouteChoiceRequest(BaseModel):
     chosen_route: Literal["shortest", "personalized"]

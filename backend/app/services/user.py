@@ -156,19 +156,26 @@ class UserService(BaseService[User, UserIn]):
             User | None: Matching user or None if not found.
         """
         return self.repo.get_by_email(email)
+    
+    @staticmethod
+    def calculate_karma_points(shortest_duration_min: int, personalized_duration_min: int, chosen_route: str) -> int:
+        """
+        Calculate karma points based on the difference in minutes and chosen route.
 
-    def apply_karma_for_route_choice(
-        self,
-        user: User,
-        choice_request: RouteChoiceRequest,
-    ) -> RouteChoiceResponse:
-        """Apply karma points for a chosen route and return awarded + total points."""
-        shortest_min = max(0, int(choice_request.shortest_duration_min))
-        personalized_min = max(0, int(choice_request.personalized_duration_min))
+        Args:
+            shortest_duration_min (int): Duration of the shortest route in minutes.
+            personalized_duration_min (int): Duration of the personalized route in minutes.
+            chosen_route (str): The route chosen by the user.
+
+        Returns:
+            int: Calculated karma points.
+        """
+        shortest_min = max(0, int(shortest_duration_min))
+        personalized_min = max(0, int(personalized_duration_min))
         delta_min = max(0, personalized_min - shortest_min)
-
+        
         awarded_points = 0
-        if choice_request.chosen_route == "personalized":
+        if chosen_route == "personalized":
             if 1 <= delta_min <= 2:
                 awarded_points = 10
             elif 3 <= delta_min <= 5:
@@ -177,6 +184,18 @@ class UserService(BaseService[User, UserIn]):
                 awarded_points = 50
             elif delta_min >= 15:
                 awarded_points = 100
+        return awarded_points
+
+    def apply_karma_for_route_choice(
+        self,
+        user: User,
+        choice_request: RouteChoiceRequest,
+    ) -> RouteChoiceResponse:
+        """Apply karma points for a chosen route and return awarded + total points."""
+        awarded_points = UserService.calculate_karma_points(
+            shortest_duration_min=choice_request.shortest_duration_min,
+            personalized_duration_min=choice_request.personalized_duration_min,
+            chosen_route=choice_request.chosen_route)
 
         updated_profile = self.profile_repo.update(
             user.profile,

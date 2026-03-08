@@ -4,6 +4,8 @@ from typing import Any
 import networkx as nx
 import osmnx as ox
 
+from .user import UserService
+
 
 class GraphStore:
     DATA_DIR = Path(__file__).resolve().parents[1] / "data"
@@ -457,8 +459,17 @@ class GraphStore:
                 "duration_min": int(route.get("duration_min", 0)),
             }
 
+        karma_points = 0
+        if shortest_route and personalized_route:
+            karma_points = UserService.calculate_karma_points(
+                shortest_duration_min=int(shortest_route.get("duration_min", 0)),
+                personalized_duration_min=int(personalized_route.get("duration_min", 0)),
+                chosen_route="personalized",
+            )
+
         return {
             "driving_style": driving_style,
             "shortest_route": to_km(shortest_route),
             "personalized_route": to_km(personalized_route),
+            "karma_points": karma_points,
         }
