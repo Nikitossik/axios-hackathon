@@ -12,6 +12,7 @@ class GraphStore:
     DEFAULT_NETWORK_TYPE = "drive"
     DEFAULT_WEIGHT = "length"
     DEFAULT_SPEED_KPH = 50.0
+    DIVERSE_TEMP_WEIGHT = "_diverse_weight"
 
     CACHED_GRAPH: nx.MultiDiGraph | None = None
     CACHED_FILE_NAME: str | None = None
@@ -129,6 +130,51 @@ class GraphStore:
                 weight=weight,
             )
         )
+
+    @staticmethod
+    def get_diverse_node_paths(
+        graph: nx.MultiDiGraph,
+        start_node: Any,
+        end_node: Any,
+        n: int = 40,
+        base_weight: str = "length",
+        penalty_mult: float = 1.30,
+    ) -> list[list[Any]]:
+        if n <= 0:
+            return []
+
+        temp_weight = GraphStore.DIVERSE_TEMP_WEIGHT
+        working_graph = graph.copy()
+
+        for _, _, edge_key, edge_attr in working_graph.edges(keys=True, data=True):
+            edge_attr[temp_weight] = float(
+                edge_attr.get(base_weight, edge_attr.get(GraphStore.DEFAULT_WEIGHT, 1.0))
+            )
+
+        paths: list[list[Any]] = []
+        seen: set[tuple[Any, ...]] = set()
+
+        for _ in range(n):
+            candidate_path = nx.shortest_path(
+                working_graph,
+                source=start_node,
+                target=end_node,
+                weight=temp_weight,
+            )
+
+            signature = tuple(candidate_path)
+            if signature in seen:
+                break
+
+            seen.add(signature)
+            paths.append(candidate_path)
+
+            for from_node, to_node in zip(candidate_path[:-1], candidate_path[1:]):
+                edge_variants = working_graph.get_edge_data(from_node, to_node) or {}
+                for variant_key, variant_attr in edge_variants.items():
+                    variant_attr[temp_weight] = float(variant_attr.get(temp_weight, 1.0)) * penalty_mult
+
+        return paths
 
     @staticmethod
     def get_path_duration_seconds(
@@ -270,6 +316,18 @@ class GraphStore:
         }
 
     @staticmethod
+    def path_overlap_ratio(base_path: list[Any], candidate_path: list[Any]) -> float:
+        base_edges = set(zip(base_path[:-1], base_path[1:]))
+        candidate_edges = set(zip(candidate_path[:-1], candidate_path[1:]))
+
+        union_size = len(base_edges | candidate_edges)
+        if union_size == 0:
+            return 0.0
+
+        intersection_size = len(base_edges & candidate_edges)
+        return intersection_size / union_size
+
+    @staticmethod
     def choose_personalized_path(
         graph: nx.MultiDiGraph,
         paths: list[list[Any]],
@@ -281,40 +339,63 @@ class GraphStore:
 
         style = (driving_style or "").lower()
 
-        if style == "dynamic":
-            index = 2 if len(paths) > 2 else len(paths) - 1
-            return paths[index]
+        fastest_path = paths[0]
+        fastest_duration = GraphStore.get_path_duration_seconds(
+            graph=graph,
+            node_path=fastest_path,
+            weight=weight,
+        )
 
-        if style == "vibe":
-            index = 6 if len(paths) > 6 else len(paths) - 1
-            return paths[index]
-
-        if style in {"safe", "eco"}:
-            target_delta = 5 * 60.0
-            fastest_duration = GraphStore.get_path_duration_seconds(
+        candidates: list[dict[str, Any]] = []
+        for candidate_path in paths[1:]:
+            candidate_duration = GraphStore.get_path_duration_seconds(
                 graph=graph,
-                node_path=paths[0],
+                node_path=candidate_path,
                 weight=weight,
             )
+            delta_min = max(0.0, (candidate_duration - fastest_duration) / 60.0)
+            overlap_ratio = GraphStore.path_overlap_ratio(fastest_path, candidate_path)
 
-            best_path = None
-            best_diff = float("inf")
+            candidates.append(
+                {
+                    "path": candidate_path,
+                    "delta_min": delta_min,
+                    "overlap_ratio": overlap_ratio,
+                    "duration_s": candidate_duration,
+                }
+            )
 
-            for path in paths[1:]:
-                duration = GraphStore.get_path_duration_seconds(
-                    graph=graph,
-                    node_path=path,
-                    weight=weight,
+        if not candidates:
+            return None
+
+        if style == "dynamic":
+            in_window = [c for c in candidates if 0.0 <= c["delta_min"] <= 3.0]
+            pool = in_window or candidates
+            best = min(pool, key=lambda c: (c["delta_min"], c["overlap_ratio"]))
+            return best["path"]
+
+        if style == "vibe":
+            in_window = [c for c in candidates if 8.0 <= c["delta_min"] <= 25.0]
+            if in_window:
+                best = min(
+                    in_window,
+                    key=lambda c: (c["overlap_ratio"], abs(c["delta_min"] - 12.0)),
                 )
-                delta = duration - fastest_duration
-                diff = abs(delta - target_delta)
-                if diff < best_diff:
-                    best_diff = diff
-                    best_path = path
+                return best["path"]
 
-            return best_path or (paths[1] if len(paths) > 1 else None)
+            fallback = max(candidates, key=lambda c: c["delta_min"])
+            return fallback["path"]
 
-        return paths[1] if len(paths) > 1 else None
+        if style in {"safe", "eco"}:
+            in_window = [c for c in candidates if 3.0 <= c["delta_min"] <= 8.0]
+            pool = in_window or candidates
+            best = min(
+                pool,
+                key=lambda c: (abs(c["delta_min"] - 5.0), c["overlap_ratio"]),
+            )
+            return best["path"]
+
+        return candidates[0]["path"]
 
     @staticmethod
     def get_two_routes_between_points(
@@ -325,19 +406,19 @@ class GraphStore:
         file_name: str | None = None,
         weight: str = "length",
         driving_style: str | None = None,
-        k_paths: int = 10,
+        k_paths: int = 40,
     ) -> dict[str, Any]:
         graph = GraphStore.get_graph(file_name=file_name)
 
         start_node = GraphStore.get_nearest_node(graph, lat=start_lat, lon=start_lon)
         end_node = GraphStore.get_nearest_node(graph, lat=end_lat, lon=end_lon)
 
-        paths = GraphStore.get_k_shortest_node_paths(
+        paths = GraphStore.get_diverse_node_paths(
             graph=graph,
             start_node=start_node,
             end_node=end_node,
-            k=max(2, k_paths),
-            weight=weight,
+            n=max(2, k_paths),
+            base_weight=weight,
         )
 
         shortest_route = (
