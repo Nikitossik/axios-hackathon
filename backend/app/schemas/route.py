@@ -17,5 +17,6 @@ class RouteOut(BaseModel):
 
 
 class RouteResponse(BaseModel):
+    driving_style: str | None
     shortest_route: RouteOut | None
     personalized_route: RouteOut | None

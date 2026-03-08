@@ -325,6 +325,7 @@ class GraphStore:
         file_name: str | None = None,
         weight: str = "length",
         driving_style: str | None = None,
+        k_paths: int = 10,
     ) -> dict[str, Any]:
         graph = GraphStore.get_graph(file_name=file_name)
 
@@ -335,7 +336,7 @@ class GraphStore:
             graph=graph,
             start_node=start_node,
             end_node=end_node,
-            k=10,
+            k=max(2, k_paths),
             weight=weight,
         )
 
@@ -367,6 +368,7 @@ class GraphStore:
         )
 
         return {
+            "driving_style": driving_style,
             "shortest_route": shortest_route,
             "personalized_route": personalized_route,
         }
