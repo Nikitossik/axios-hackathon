@@ -6,6 +6,7 @@ from ..repositories import (
 from ..models import User
 from ..schemas.user import UserIn, UserUpdate, UserOut
 from ..schemas.user_profile import UserProfileIn
+from ..schemas.route import RouteChoiceRequest, RouteChoiceResponse
 from ..utils import exceptions, security
 from app.utils.exceptions import AlreadyExistsException
 from .base import BaseService
@@ -155,3 +156,34 @@ class UserService(BaseService[User, UserIn]):
             User | None: Matching user or None if not found.
         """
         return self.repo.get_by_email(email)
+
+    def apply_karma_for_route_choice(
+        self,
+        user: User,
+        choice_request: RouteChoiceRequest,
+    ) -> RouteChoiceResponse:
+        """Apply karma points for a chosen route and return awarded + total points."""
+        shortest_min = max(0, int(choice_request.shortest_duration_min))
+        personalized_min = max(0, int(choice_request.personalized_duration_min))
+        delta_min = max(0, personalized_min - shortest_min)
+
+        awarded_points = 0
+        if choice_request.chosen_route == "personalized":
+            if 1 <= delta_min <= 2:
+                awarded_points = 10
+            elif 3 <= delta_min <= 5:
+                awarded_points = 20
+            elif 6 <= delta_min <= 14:
+                awarded_points = 50
+            elif delta_min >= 15:
+                awarded_points = 100
+
+        updated_profile = self.profile_repo.update(
+            user.profile,
+            {"karma_points": user.profile.karma_points + awarded_points},
+        )
+
+        return RouteChoiceResponse(
+            awarded_points=awarded_points,
+            total_karma_points=updated_profile.karma_points,
+        )

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-
+from typing import Literal
 
 class PointIn(BaseModel):
     lat: float = Field(..., ge=-90, le=90)
@@ -20,3 +20,13 @@ class RouteResponse(BaseModel):
     driving_style: str | None
     shortest_route: RouteOut | None
     personalized_route: RouteOut | None
+
+class RouteChoiceRequest(BaseModel):
+    chosen_route: Literal["shortest", "personalized"]
+    shortest_duration_min: int
+    personalized_duration_min: int
+
+
+class RouteChoiceResponse(BaseModel):
+    awarded_points: int
+    total_karma_points: int

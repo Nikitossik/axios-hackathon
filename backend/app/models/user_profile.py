@@ -21,5 +21,5 @@ class UserProfile(Base):
     driving_experience_years: Mapped[int] = mapped_column(Integer)
     gender_identity: Mapped[UserGenderEnum] = mapped_column(Enum(UserGenderEnum, create_constraint=True, name="user_gender_enum"))
     gender_self_description: Mapped[str] = mapped_column(String(100), nullable=True)
-    
+    karma_points: Mapped[int] = mapped_column(Integer, default=0)
     user: Mapped["User"] = relationship("User", back_populates="profile", uselist=False)

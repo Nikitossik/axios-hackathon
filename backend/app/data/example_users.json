@@ -9,7 +9,8 @@
                 "gender": "female",
                 "age_group": "25_35",
                 "driving_experience_years": 3,
-                "driving_style": "safe"
+                "driving_style": "safe",
+                "karma_points": 150
             }
         },
         {
@@ -21,7 +22,8 @@
                 "gender": "male",
                 "age_group": "18_25",
                 "driving_experience_years": 4,
-                "driving_style": "dynamic"
+                "driving_style": "dynamic",
+                "karma_points": 200
             }
         },
         {
@@ -33,7 +35,8 @@
                 "gender": "female",
                 "age_group": "35_plus",
                 "driving_experience_years": 14,
-                "driving_style": "eco"
+                "driving_style": "eco",
+                "karma_points": 300
             }
         },
         {
@@ -45,7 +48,8 @@
                 "gender": "male",
                 "age_group": "35_plus",
                 "driving_experience_years": 10,
-                "driving_style": "vibe"
+                "driving_style": "vibe",
+                "karma_points": 250
             }
         }
     ]

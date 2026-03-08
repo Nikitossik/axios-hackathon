@@ -18,5 +18,5 @@ class UserProfileIn(UserProfileBase):
     pass
 
 class UserProfileOut(UserProfileBase):
-    pass
+    karma_points: int = Field(..., description="User's karma points")
     

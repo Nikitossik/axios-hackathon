@@ -33,6 +33,7 @@ class DatabaseSeeder:
 			"driving_experience_years": int(profile_payload["driving_experience_years"]),
 			"driving_style": UserDrivingStyleEnum(profile_payload["driving_style"]),
 			"gender_self_description": profile_payload.get("gender_self_description"),
+            "karma_points": profile_payload.get("karma_points", 0)
 		}
 
 	@staticmethod
