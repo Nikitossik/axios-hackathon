@@ -265,7 +265,7 @@ class GraphStore:
 
         return {
             "coordinates": coordinates,
-            "distance_km": round(distance_m / 1000.0, 1),
+            "distance_m": int(round(distance_m)),
             "duration_min": int(round(duration_s / 60.0)),
         }
 
@@ -367,8 +367,17 @@ class GraphStore:
             else None
         )
 
+        def to_km(route: dict[str, Any] | None) -> dict[str, Any] | None:
+            if route is None:
+                return None
+            return {
+                "coordinates": route.get("coordinates", []),
+                "distance_km": round(float(route.get("distance_m", 0)) / 1000.0, 1),
+                "duration_min": int(route.get("duration_min", 0)),
+            }
+
         return {
             "driving_style": driving_style,
-            "shortest_route": shortest_route,
-            "personalized_route": personalized_route,
+            "shortest_route": to_km(shortest_route),
+            "personalized_route": to_km(personalized_route),
         }

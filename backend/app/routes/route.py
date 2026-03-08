@@ -25,12 +25,13 @@ async def get_route(
             else None
         )
 
-        return GraphStore.get_two_routes_between_points(
+        raw_result = GraphStore.get_two_routes_between_points(
             start_lat=payload.start.lat,
             start_lon=payload.start.lon,
             end_lat=payload.end.lat,
             end_lon=payload.end.lon,
             driving_style=driving_style,
         )
+        return raw_result
     except nx.NetworkXNoPath:
         raise HTTPException(status_code=404, detail="No route between provided points")
