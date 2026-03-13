@@ -1,14 +1,26 @@
-# 🌍 EcoFlow – System-Optimal Navigation
+<div align="center">
+
+# 🌍 EcoFlow
+
+### System-Optimal Navigation Platform
 
 A next-generation navigation platform that optimizes **city-wide traffic flow**, not just individual routes.
 
-Unlike traditional navigation apps that route every driver through the same "fastest" path, **EcoFlow distributes traffic intelligently across the network**, reducing congestion and improving the overall traffic ecosystem.
-![Next.js](https://img.shields.io/badge/Next.js-14-black)
-![React](https://img.shields.io/badge/React-18-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+Unlike traditional navigation apps that route every driver through the same **"fastest" path**, **EcoFlow distributes traffic intelligently across the network**, reducing congestion and improving the overall traffic ecosystem.
 
-Built with **Next.js, Mapbox GL JS, and FastAPI**.
+<br>
+
+<img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white"/>
+<img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB"/>
+<img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white"/>
+<img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
+<img src="https://img.shields.io/badge/Mapbox-000000?style=for-the-badge&logo=mapbox&logoColor=white"/>
+
+<br>
+
+<img src="https://img.shields.io/badge/License-MIT-green?style=flat-square"/>
+
+</div>
 
 ---
 
