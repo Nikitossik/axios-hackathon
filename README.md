@@ -8,7 +8,7 @@ Instead of just finding the absolute fastest route for a single driver — which
 
 ## ✨ Key Features
 
-* **🌍 System-Optimal vs. Selfish Routing:** Traditional navigation apps route everyone through the exact same "fastest" path, causing congestion. Our app distributes traffic intelligently to optimize the global city network, offering a "Personalized" route alongside the standard fastest one.
+* **🌍 System-Optimal vs Selfish Routing:** Traditional navigation apps route everyone through the exact same "fastest" path, causing congestion. Our app distributes traffic intelligently to optimize the global city network, offering a "Personalized" route alongside the standard fastest one.
 * **🎭 Driver Profiling & "Characters":** We understand that every driver has different needs. The app creates a customizable "Character" for each user based on their specific driving style:
     * **Dynamic:** For drivers who prefer to keep moving and avoid standing in traffic.
     * **Safe:** Prioritizing wider roads, fewer complex intersections, and calmer traffic (e.g., parents driving with children).
