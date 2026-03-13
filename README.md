@@ -129,32 +129,6 @@ Authentication is handled using:
 
 The system follows the **Post-Redirect-Get (PRG) pattern** to prevent duplicate form submissions.
 
----
-
-# 🏗️ Architecture
-
-The project follows a **modern full-stack architecture**.
-
-### Frontend
-
-- Next.js (App Router)
-- React 18
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-- Mapbox GL JS
-
-### Backend
-
-- FastAPI
-- Traffic routing algorithms
-- Route scoring and system-optimal logic
-
-### Communication
-
-- REST API
-- JWT authentication
-- secure cookies
 
 ---
 
