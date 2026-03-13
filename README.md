@@ -4,7 +4,7 @@ A modern web application built with **Next.js (App Router)** and **Mapbox GL JS*
 
 Instead of just finding the absolute fastest route for a single driver — which often creates bottlenecks and traffic jams elsewhere — our application calculates the best route for the *entire traffic ecosystem*. To incentivize drivers to choose these system-friendly routes, the app introduces an innovative **Driver Profiling and Gamification** system, tailoring the navigation experience to individual behaviors and needs.
 
-![Project Preview](<LINK_TO_YOUR_SCREENSHOT_HERE>) ## ✨ Key Features
+![Project Preview](<img width="1008" height="562" alt="Image" src="https://github.com/user-attachments/assets/e51d88fb-724f-4c56-bfed-32bb4efc3db2" />) ## ✨ Key Features
 
 * **🌍 System-Optimal vs. Selfish Routing:** Traditional navigation apps route everyone through the exact same "fastest" path, causing congestion. Our app distributes traffic intelligently to optimize the global city network, offering a "Personalized" route alongside the standard fastest one.
 * **🎭 Driver Profiling & "Characters":** We understand that every driver has different needs. The app creates a customizable "Character" for each user based on their specific driving style:
