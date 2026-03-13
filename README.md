@@ -146,7 +146,6 @@ Potential future features:
 ---
 
 # 🛠️ Tech Stack
-
 ## Frontend
 
 - Next.js
