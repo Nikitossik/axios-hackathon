@@ -3,6 +3,10 @@
 A next-generation navigation platform that optimizes **city-wide traffic flow**, not just individual routes.
 
 Unlike traditional navigation apps that route every driver through the same "fastest" path, **EcoFlow distributes traffic intelligently across the network**, reducing congestion and improving the overall traffic ecosystem.
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![React](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 Built with **Next.js, Mapbox GL JS, and FastAPI**.
 
